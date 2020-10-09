@@ -1,5 +1,5 @@
 ---
-title: "p8105_hw3_ss5932"
+title: "Homework 3"
 author: "Shelley Shen"
 date: "10/6/2020"
 output: github_document
@@ -26,6 +26,11 @@ scale_colour_discrete = scale_color_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+
+## Problem 1
+
+Load Instacart data. 
+
 ```{r}
 data("instacart")
 ```
@@ -45,7 +50,7 @@ instacart %>%
 ```
 
 
-Let's make a plot of
+Let's make a plot of the number of items ordered in each aisle, limited to those aisles with >10,000 items ordered. 
 
 ```{r}
 instacart %>% 
@@ -86,6 +91,81 @@ instacart %>%
     values_from = mean_hour
   )
 ```
+
+
+
+## Problem 2
+
+Load in the accelerometer data and tidy. 
+
+```{r}
+accel_df = 
+  read_csv("./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    activity_1:activity_1440,
+    names_to = "minute",
+    names_prefix = "activity_",
+    values_to = "activity_count") %>% 
+  group_by(day) %>% 
+  mutate(
+    minute = as.numeric(minute), 
+    day = as.factor(day),
+    activity_count = as.numeric(activity_count),
+    day = forcats::fct_relevel(day, c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")),
+    weekday = if_else(day %in% c("Saturday", "Sunday"), "Weekend", "Weekday"))
+```
+
+
+
+**Part 1**
+- tidy using pivot long --> columns are week, day of week, minute of day, and activity count. 
+- mutate for weekday vs. weekend
+
+
+**Part 2**
+
+- aggregate activity for total day --> group_by week, day and summarize --> 35 days --> week # and day of week
+- trends inherent: more activity during certain day, etc.
+
+**Part 3**
+- single panel plot: x = minute, y = activity count --> scatterplot with geom_line, color to indicate day of week, trends
+
+Potential issues:
+- day of week by default in alphabetical order --> use factors to order how we want
+- when pivot_longer, need to check if minute is in numeric format or some other format so the plot will make sense when merged
+
+
+
+## Problem 3
+
+```{r}
+data("ny_noaa")
+```
+
+**Part 1**
+- separate date variable into month, day, year
+- make sure unit is reasonable based on data dictionary
+- need to count and rank
+
+**Part 2**
+- need to group so avg max temp separately in Jan and in July --> use group_by and summarize 
+- group by station, year, month, then summarize avg max temp, filter
+- y = station, x = years 
+
+
+**Part 3**
+- make 2 plots and merge together 
+- 1) contour plot, bin plot, or hex plot
+- 2) filter, show distribution (fox plot, violin, ridge -- one ridge per year)
+
+
+
+
+
+
+
+
 
 
 
