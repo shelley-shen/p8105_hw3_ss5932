@@ -96,6 +96,10 @@ instacart %>%
 
 ## Problem 2
 
+**Part 1**
+- tidy using pivot long --> columns are week, day of week, minute of day, and activity count. 
+- mutate for weekday vs. weekend
+
 Load in the accelerometer data and tidy. 
 
 ```{r}
@@ -116,20 +120,38 @@ accel_df =
     weekday = if_else(day %in% c("Saturday", "Sunday"), "Weekend", "Weekday"))
 ```
 
-
-
-**Part 1**
-- tidy using pivot long --> columns are week, day of week, minute of day, and activity count. 
-- mutate for weekday vs. weekend
+The accelerometer dataset contains information regarding the amount of physical activity measured in an accelerometer worn by a 63 year-old male with BMI 25 and congestive heart failure and is being monitored by the Advanced Cardiac Care Center of Columbia University Medical Center. After tidying and organizing the data, the resulting dataset has `r nrow(accel_df)` observations with `r ncol(accel_df)` columns and `r nrow(accel_df)` rows. The variables in the data include the week, day of the week, whether it was the weekday or weekend, minute of the day, and activity count. 
 
 
 **Part 2**
-
 - aggregate activity for total day --> group_by week, day and summarize --> 35 days --> week # and day of week
 - trends inherent: more activity during certain day, etc.
 
+
+Find the aggregate activity level for each day and display in a table. 
+
+```{r}
+accel_df %>% 
+  group_by(week, day) %>% 
+  summarize(total_activity = sum(activity_count)) %>% 
+  knitr::kable(digits = 1)
+```
+
+
 **Part 3**
 - single panel plot: x = minute, y = activity count --> scatterplot with geom_line, color to indicate day of week, trends
+
+Make a plot depicting the time course for each day. 
+
+```{r}
+accel_df %>% 
+  ggplot(aes(x = minute, y = activity_count)) +
+  geom_point(aes(color = day, alpha = 0.3))
+```
+
+
+
+
 
 Potential issues:
 - day of week by default in alphabetical order --> use factors to order how we want
