@@ -155,8 +155,7 @@ accel_df %>%
   labs(
     title = "24 hour activity level by day of the week",
     x = "Time of day",
-    y = "Activity level"
-  )
+    y = "Activity level")
 ```
 
 From this graph of the subject's activity levels collected by the accelerometer, we can see that much of his activity levels occurred during the day between the waking hours of 7:00am (7:00) and 10:00pm (22:00). There were spurts of activity at certain times on specific days. For example, there are peaks of activity late Sunday mornings between 10:00am and 12:00pm, and Friday evenings between 8:00pm and 10:00pm appear particularly active. There is significantly less activity during the late night and early morning hours, as we can presume the subject was sleeping. 
@@ -164,14 +163,39 @@ From this graph of the subject's activity levels collected by the accelerometer,
 
 ## Problem 3
 
+Load the NY NOAA dataset from the P8105 library. 
+
 ```{r}
 data("ny_noaa")
 ```
+
+The NY NOAA dataset is from the National Oceanic and Atmospheric Association (NOAA) National Cliamtic Data Center containing information on weather data collected from all the weather stations in New York from January 1, 1981 through December 31, 2010. The dataset contains the variables weather station ID, observation date, amount of precipitation, snowfall, snow depth, maximum and minimum temperature. There are `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns. 
+
 
 **Part 1**
 - separate date variable into month, day, year
 - make sure unit is reasonable based on data dictionary
 - need to count and rank
+
+Separate the date variable into month, day, year; convert units to whole units
+
+```{r}
+ny_noaa_df = 
+  ny_noaa %>%
+  separate(date, c("year", "month", "day"), convert = TRUE) %>% 
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day),
+    tmax = as.numeric(tmax) / 10,
+    tmin = as.numeric(tmin) / 10,
+    prcp = prcp / 10
+  )
+```
+
+
+-- most commonly observed values for snowfall: use count
+
 
 **Part 2**
 - need to group so avg max temp separately in Jan and in July --> use group_by and summarize 
