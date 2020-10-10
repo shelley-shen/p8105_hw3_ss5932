@@ -8,6 +8,8 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(p8105.datasets)
+library(dplyr)
+library(rnoaa)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -117,46 +119,47 @@ accel_df =
     day = as.factor(day),
     activity_count = as.numeric(activity_count),
     day = forcats::fct_relevel(day, c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")),
-    weekday = if_else(day %in% c("Saturday", "Sunday"), "Weekend", "Weekday"))
+    weekday_vs_weekend = if_else(day %in% c("Saturday", "Sunday"), "Weekend", "Weekday"))
 ```
 
-The accelerometer dataset contains information regarding the amount of physical activity measured in an accelerometer worn by a 63 year-old male with BMI 25 and congestive heart failure and is being monitored by the Advanced Cardiac Care Center of Columbia University Medical Center. After tidying and organizing the data, the resulting dataset has `r nrow(accel_df)` observations with `r ncol(accel_df)` columns and `r nrow(accel_df)` rows. The variables in the data include the week, day of the week, whether it was the weekday or weekend, minute of the day, and activity count. 
-
+The accelerometer dataset contains information regarding the amount of physical activity measured in an accelerometer worn by a 63 year-old male with BMI 25 and congestive heart failure and is being monitored by the Advanced Cardiac Care Center of Columbia University Medical Center. After tidying and organizing the data, the resulting dataset has `r nrow(accel_df)` observations with `r ncol(accel_df)` columns and `r nrow(accel_df)` rows. The variables in the data include the week, day of the week, day of the trial, whether it was the weekday or weekend, minute of the day, and activity count. 
 
 **Part 2**
-- aggregate activity for total day --> group_by week, day and summarize --> 35 days --> week # and day of week
-- trends inherent: more activity during certain day, etc.
-
 
 Find the aggregate activity level for each day and display in a table. 
 
 ```{r}
 accel_df %>% 
-  group_by(week, day) %>% 
+  group_by(day) %>% 
   summarize(total_activity = sum(activity_count)) %>% 
   knitr::kable(digits = 1)
 ```
 
+From this table of total activity per day of the week, we observe that on average, Friday has the most activity while Saturday has the least amount of activity. 
+
 
 **Part 3**
-- single panel plot: x = minute, y = activity count --> scatterplot with geom_line, color to indicate day of week, trends
 
 Make a plot depicting the time course for each day. 
 
 ```{r}
 accel_df %>% 
-  ggplot(aes(x = minute, y = activity_count)) +
-  geom_point(aes(color = day, alpha = 0.3))
+  group_by(day) %>% 
+  ggplot(aes(x = minute, y = activity_count, color = day)) +
+  geom_line(alpha = 0.3) +
+  stat_smooth() +
+  scale_x_continuous(
+    breaks = c(0, 240, 480, 720, 960, 1200, 1440),
+    labels = c("00:00", "4:00", "8:00", "12:00", "16:00", "20:00", "23:59")
+  ) +
+  labs(
+    title = "24 hour activity level by day of the week",
+    x = "Time of day",
+    y = "Activity level"
+  )
 ```
 
-
-
-
-
-Potential issues:
-- day of week by default in alphabetical order --> use factors to order how we want
-- when pivot_longer, need to check if minute is in numeric format or some other format so the plot will make sense when merged
-
+From this graph of the subject's activity levels collected by the accelerometer, we can see that much of his activity levels occurred during the day between the waking hours of 7:00am (7:00) and 10:00pm (22:00). There were spurts of activity at certain times on specific days. For example, there are peaks of activity late Sunday mornings between 10:00am and 12:00pm, and Friday evenings between 8:00pm and 10:00pm appear particularly active. There is significantly less activity during the late night and early morning hours, as we can presume the subject was sleeping. 
 
 
 ## Problem 3
