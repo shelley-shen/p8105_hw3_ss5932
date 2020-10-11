@@ -10,6 +10,7 @@ library(tidyverse)
 library(p8105.datasets)
 library(dplyr)
 library(rnoaa)
+library(ggridges)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -130,13 +131,22 @@ Find the aggregate activity level for each day and display in a table.
 
 ```{r}
 accel_df %>% 
+  group_by(week, day) %>% 
+  summarize(total_activity = sum(activity_count)) %>% 
+  knitr::kable(digits = 1)
+```
+
+From this table of total activity per day, we cannot directly observe any trends aside from the fact that activity levels were much lower on the Saturday's of weeks 4 and 5. 
+
+I also made a table aggregating the activity level per day of the week.
+```{r}
+accel_df %>% 
   group_by(day) %>% 
   summarize(total_activity = sum(activity_count)) %>% 
   knitr::kable(digits = 1)
 ```
 
-From this table of total activity per day of the week, we observe that on average, Friday has the most activity while Saturday has the least amount of activity. 
-
+From this second table, we can observe that on average, the subject had the highest level of activity on Friday's and the lowest activity levels on Saturday.
 
 **Part 3**
 
@@ -157,6 +167,7 @@ accel_df %>%
     x = "Time of day (hour)",
     y = "Activity level")
 ```
+
 
 From this graph of the subject's activity levels collected by the accelerometer, we can see that much of his activity levels occurred during the day between the waking hours of 7:00am (7:00) and 10:00pm (22:00). There were spurts of activity at certain times on specific days. For example, there are peaks of activity late Sunday mornings between 10:00am and 12:00pm, and Friday evenings between 8:00pm and 10:00pm appear particularly active. There is significantly less activity during the late night and early morning hours, as we can presume the subject was sleeping. 
 
@@ -236,8 +247,36 @@ Overall, the average maximum temperature was much higher in July than in January
 Make a two-panel plot showing tmax and tmin for the entire dataset.
 
 ```{r}
+library(patchwork)
 
-```
+temp_plot = 
+  ny_noaa_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_hex() + 
+  labs(
+    title = "Maximum vs. minimum temperatures",
+    x = "Minumum temperature (C)", 
+    y = "Maximum temperature (C)") +
+  theme(legend.position = "right")
+  
+  
+snow_plot = 
+  ny_noaa_df %>%
+  filter(snow > 0 & snow < 100) %>% 
+  group_by(year) %>% 
+  ggplot(aes(x = snow, y = year, group = year)) +
+  geom_density_ridges() +
+  labs(
+    title = "Distribution of snowfall by year",
+    x = "Snowfall (mm)",
+    y = "Year") +
+  theme(plot.title = element_text(size = 10))
+
+final_plot = temp_plot + snow_plot
+
+ggsave("final_temp_snow_plot.pdf", final_plot)
+
+```   
 
 
 
