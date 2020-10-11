@@ -154,7 +154,7 @@ accel_df %>%
   ) +
   labs(
     title = "24 hour activity level by day of the week",
-    x = "Time of day",
+    x = "Time of day (hour)",
     y = "Activity level")
 ```
 
@@ -182,19 +182,27 @@ Separate the date variable into month, day, year; convert units to whole units
 ```{r}
 ny_noaa_df = 
   ny_noaa %>%
+  drop_na() %>% 
   separate(date, c("year", "month", "day"), convert = TRUE) %>% 
   mutate(
     year = as.integer(year),
-    month = as.integer(month),
+    month = month.name[as.integer(month)],
     day = as.integer(day),
     tmax = as.numeric(tmax) / 10,
     tmin = as.numeric(tmin) / 10,
-    prcp = prcp / 10
+    prcp = as.numeric(prcp) / 10
   )
 ```
 
+Find the most commonly observed value for snowfall. 
 
--- most commonly observed values for snowfall: use count
+```{r}
+ny_noaa_df %>% 
+  count(snow, name = "snow_obs") %>% 
+  arrange(desc(snow_obs))
+```
+
+The most commonly observed value for snowfall is 0 centimeters with 2,008,508 observations for this value. This can be explained by a lack of snowfall on the majority of days or that there are certain stations which receive less snowfall than others. 
 
 
 **Part 2**
@@ -202,11 +210,34 @@ ny_noaa_df =
 - group by station, year, month, then summarize avg max temp, filter
 - y = station, x = years 
 
+Create two-panel plot showing the average *max* temperature in January and July in each station across years. 
+
+```{r}
+ny_noaa_df %>% 
+  group_by(id, year, month) %>% 
+  filter(month %in% c("January", "July")) %>%
+  summarize(avg_tmax = mean(tmax)) %>% 
+  ggplot(aes(x = year, y = avg_tmax, color = month)) +
+    geom_point() +
+    facet_grid(. ~ month) +
+    labs(
+      title = "Average max temperature (C) over time in January vs. July",
+      x = "Year",
+      y = "Average max temperatures (C)")
+```
+
+Overall, the average maximum temperature was much higher in July than in January with consistent readings across stations. There are a few times when there was a large difference in maximum temperature difference for certain stations.  
 
 **Part 3**
-- make 2 plots and merge together 
+- make 2 plots and merge together =
 - 1) contour plot, bin plot, or hex plot
 - 2) filter, show distribution (fox plot, violin, ridge -- one ridge per year)
+
+Make a two-panel plot showing tmax and tmin for the entire dataset.
+
+```{r}
+
+```
 
 
 
