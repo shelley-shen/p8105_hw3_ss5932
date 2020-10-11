@@ -30,7 +30,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-## Problem 1
+## Problem 1 (from class)
 
 Load Instacart data. 
 
@@ -40,8 +40,7 @@ data("instacart")
 
 This dataset contains `r nrow(instacart)` rows and `r ncol(instacart)` columns. 
 
-Observations are the level of items in orders by user. There are user / order variables -- user ID, oder ID, order day, and order hour. There are also item variables == name, aisle, department, and some numeric codes. 
-
+Observations are the level of items in orders by user. There are user and order variables with user ID, order ID, order day, and order hour. There are also item variables including name, aisle, department, and some numeric codes. 
 
 
 How many aisles, and which are most items from?
@@ -100,8 +99,6 @@ instacart %>%
 ## Problem 2
 
 **Part 1**
-- tidy using pivot long --> columns are week, day of week, minute of day, and activity count. 
-- mutate for weekday vs. weekend
 
 Load in the accelerometer data and tidy. 
 
@@ -136,9 +133,10 @@ accel_df %>%
   knitr::kable(digits = 1)
 ```
 
-From this table of total activity per day, we cannot directly observe any trends aside from the fact that activity levels were much lower on the Saturday's of weeks 4 and 5. 
+From this table of total activity per day, we cannot directly observe any trends aside from the fact that activity levels were much lower on the Saturday's of weeks 4 and 5 and a little lower on the Monday of the first week.  
 
-I also made a table aggregating the activity level per day of the week.
+However, to get a better understanding of the activity level trends per day of the week, I made a second table aggregating the activity level per day of the week.
+
 ```{r}
 accel_df %>% 
   group_by(day) %>% 
@@ -146,7 +144,7 @@ accel_df %>%
   knitr::kable(digits = 1)
 ```
 
-From this second table, we can observe that on average, the subject had the highest level of activity on Friday's and the lowest activity levels on Saturday.
+From this second table, we can observe that on average, the subject had the highest level of activity on Friday's and the lowest activity levels on Saturday's.
 
 **Part 3**
 
@@ -180,15 +178,12 @@ Load the NY NOAA dataset from the P8105 library.
 data("ny_noaa")
 ```
 
-The NY NOAA dataset is from the National Oceanic and Atmospheric Association (NOAA) National Cliamtic Data Center containing information on weather data collected from all the weather stations in New York from January 1, 1981 through December 31, 2010. The dataset contains the variables weather station ID, observation date, amount of precipitation, snowfall, snow depth, maximum and minimum temperature. There are `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns. 
+The NY NOAA dataset is from the National Oceanic and Atmospheric Association (NOAA) National Cliamtic Data Center containing information on weather data collected from all the weather stations in New York from January 1, 1981 through December 31, 2010. The dataset contains the variables weather station ID, observation date, amount of precipitation, snowfall, snow depth, maximum and minimum temperature. There are `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns. There are a number of missing data, varying in temperature readings, precipitation measurement, snowfall, and snow depth across multiple stations and years. These missing data can be problematic as it skews our analysis of the results and can create potential selection bias. 
 
 
 **Part 1**
-- separate date variable into month, day, year
-- make sure unit is reasonable based on data dictionary
-- need to count and rank
 
-Separate the date variable into month, day, year; convert units to whole units
+Separate the date variable into month, day, and year, and convert units to whole units. 
 
 ```{r}
 ny_noaa_df = 
@@ -217,9 +212,6 @@ The most commonly observed value for snowfall is 0 centimeters with 2,008,508 ob
 
 
 **Part 2**
-- need to group so avg max temp separately in Jan and in July --> use group_by and summarize 
-- group by station, year, month, then summarize avg max temp, filter
-- y = station, x = years 
 
 Create two-panel plot showing the average *max* temperature in January and July in each station across years. 
 
@@ -232,19 +224,16 @@ ny_noaa_df %>%
     geom_point() +
     facet_grid(. ~ month) +
     labs(
-      title = "Average max temperature (C) over time in January vs. July",
+      title = "Average maximum temperature (C) over time in January vs. July",
       x = "Year",
-      y = "Average max temperatures (C)")
+      y = "Average maximum temperatures (C)")
 ```
 
-Overall, the average maximum temperature was much higher in July than in January with consistent readings across stations. There are a few times when there was a large difference in maximum temperature difference for certain stations.  
+Overall, the average maximum temperature was much higher in July than in January with consistent readings across stations. There are a few times when there was a large difference in maximum temperature difference for certain stations. In January of 1982 and 1996, there are a few stations with particularly low average maximum temperatures. In July of 1988, there is a station with a very low average max temperature reading. The difference in average maximum temperature also varies over time. 
 
 **Part 3**
-- make 2 plots and merge together =
-- 1) contour plot, bin plot, or hex plot
-- 2) filter, show distribution (fox plot, violin, ridge -- one ridge per year)
 
-Make a two-panel plot showing tmax and tmin for the entire dataset.
+Make a two-panel plot showing the maximum and minimum temperatures for the entire dataset.
 
 ```{r}
 library(patchwork)
@@ -258,8 +247,10 @@ temp_plot =
     x = "Minumum temperature (C)", 
     y = "Maximum temperature (C)") +
   theme(legend.position = "right")
-  
-  
+
+plot(temp_plot)
+
+
 snow_plot = 
   ny_noaa_df %>%
   filter(snow > 0 & snow < 100) %>% 
@@ -272,10 +263,12 @@ snow_plot =
     y = "Year") +
   theme(plot.title = element_text(size = 10))
 
+plot(snow_plot)
+
+
 final_plot = temp_plot + snow_plot
 
 ggsave("final_temp_snow_plot.pdf", final_plot)
-
 ```   
 
 
